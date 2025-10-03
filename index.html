@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phytoextraction Research Data Extractor</title>
+    <link rel="stylesheet" href="/static/style.css?v=2024100301">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Phytoextraction Research Data Extractor</h1>
+            <p>Automated extraction of experimental results from scientific articles</p>
+        </header>
+
+        <!-- OCR BLOCK: Handles optical character recognition of scientific articles -->
+        <section id="ocr-block" class="processing-block">
+            <h2>📄 OCR Processing</h2>
+            <div class="block-content">
+                <!-- semantic_anchor: file_upload_interface -->
+                <div class="upload-section">
+                    <label for="pdf-files">Upload PDF Files:</label>
+                    <input type="file" id="pdf-files" multiple accept=".pdf">
+                    <div class="file-list" id="file-list"></div>
+                </div>
+
+                <div class="doi-section">
+                    <label for="doi-input">Or enter DOI:</label>
+                    <input type="text" id="doi-input" placeholder="10.1000/182">
+                </div>
+
+                <!-- semantic_anchor: ocr_method_selection -->
+                <div class="ocr-options">
+                    <h3>OCR Method:</h3>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="ocr-method" value="nougat" checked>
+                            <span>Nougat OCR (Local)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="ocr-method" value="lm-studio">
+                            <span>LM Studio (Local)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="ocr-method" value="api">
+                            <span>API Call (Gemini Direct OCR)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="start-ocr" class="primary-btn" disabled>Start OCR Processing</button>
+                
+                <div class="progress-section" id="ocr-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="progress-text">Processing...</p>
+                </div>
+
+                <!-- semantic_anchor: ocr_results_display -->
+                <div class="results-section" id="ocr-results" style="display: none;">
+                    <h3>Processed Text:</h3>
+                    <textarea id="ocr-text" readonly></textarea>
+                    <div class="result-actions">
+                        <button id="save-markdown" class="secondary-btn">Save as Markdown</button>
+                        <button id="proceed-to-llm" class="primary-btn">Proceed to LLM Extraction</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LLM EXTRACTION BLOCK: Extracts structured data using language models -->
+        <section id="llm-block" class="processing-block">
+            <h2>🧠 LLM Extraction</h2>
+            <div class="block-content">
+                <!-- semantic_anchor: markdown_file_selection -->
+                <div class="md-upload-section">
+                    <label for="md-files">Or upload existing Markdown files:</label>
+                    <input type="file" id="md-files" multiple accept=".md">
+                </div>
+
+                <!-- semantic_anchor: llm_provider_selection -->
+                <div class="llm-options">
+                    <h3>LLM Provider:</h3>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="llm-provider" value="openai" checked>
+                            <span>OpenAI API</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="llm-provider" value="gemini">
+                            <span>Google Gemini 2.5 Pro</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="llm-provider" value="lm-studio">
+                            <span>LM Studio (Local)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="llm-provider" value="ollama">
+                            <span>Ollama (Local)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="text-preview">
+                    <h3>Text to Process:</h3>
+                    <textarea id="llm-input-text" readonly></textarea>
+                </div>
+
+                <button id="start-llm" class="primary-btn" disabled>Start LLM Processing</button>
+
+                <div class="progress-section" id="llm-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="progress-text">Extracting data...</p>
+                </div>
+
+                <!-- semantic_anchor: json_results_display -->
+                <div class="results-section" id="llm-results" style="display: none;">
+                    <h3>Extracted JSON Schema:</h3>
+                    <pre id="json-output"></pre>
+                    <div class="result-actions">
+                        <button id="copy-json" class="secondary-btn">Copy JSON</button>
+                        <button id="validate-json" class="secondary-btn">Validate with LLM</button>
+                        <button id="add-to-db" class="primary-btn">Add Article to DB</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VALIDATION BLOCK: LLM-based JSON validation -->
+        <section id="validation-block" class="processing-block" style="display: none;">
+            <h2>🔍 LLM Validation</h2>
+            <div class="block-content">
+                <div class="validation-options">
+                    <h3>Validation Options:</h3>
+                    <div class="validation-controls">
+                        <label for="validation-samples">Number of samples to validate:</label>
+                        <input type="number" id="validation-samples" min="1" max="10" value="3">
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="validate-on-save" checked>
+                            <span>Validate when saving to database</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="start-validation" class="primary-btn">Start Validation</button>
+
+                <div class="progress-section" id="validation-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <p class="progress-text">Validating with LLM...</p>
+                </div>
+
+                <div class="results-section" id="validation-results" style="display: none;">
+                    <h3>Validation Results:</h3>
+                    <div class="validation-summary">
+                        <div class="accuracy-display">
+                            <span class="accuracy-label">Accuracy:</span>
+                            <span class="accuracy-value" id="accuracy-value">0%</span>
+                        </div>
+                        <div class="validation-stats">
+                            <span>Validated: <span id="validated-count">0</span></span>
+                            <span>Correct: <span id="correct-count">0</span></span>
+                        </div>
+                    </div>
+                    <div class="validation-details" id="validation-details">
+                        <!-- Detailed validation results will be populated here -->
+                    </div>
+                    <div class="result-actions">
+                        <button id="save-with-validation" class="primary-btn">Save to DB with Validation</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DATABASE INTERACTION BLOCK: Query and manage extracted results -->
+        <section id="db-block" class="processing-block">
+            <h2>🗃️ Database Interaction</h2>
+            <div class="block-content">
+                <!-- semantic_anchor: database_query_interface -->
+                <div class="query-section">
+                    <label for="db-query">Database Query:</label>
+                    <textarea id="db-query" placeholder="Enter MongoDB query or natural language description"></textarea>
+                    
+                    <div class="query-provider-selection">
+                        <label for="query-provider">Query Generation Provider:</label>
+                        <select id="query-provider">
+                            <option value="simple">Simple (Keyword-based)</option>
+                            <option value="openai">OpenAI API</option>
+                            <option value="gemini">Google Gemini 2.5 Pro</option>
+                            <option value="lm-studio">LM Studio</option>
+                            <option value="ollama">Ollama</option>
+                        </select>
+                    </div>
+                    
+                    <div class="query-actions">
+                        <button id="generate-query" class="secondary-btn">Generate Query from Natural Language</button>
+                        <button id="send-query" class="primary-btn" disabled>Send Query</button>
+                    </div>
+                </div>
+
+                <div class="query-results" id="query-results" style="display: none;">
+                    <h3>Query Results:</h3>
+                    <pre id="query-output"></pre>
+                    <p class="result-count">Found <span id="result-count">0</span> documents</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILE MANAGEMENT BLOCK: Displays saved OCR-JSON file pairs -->
+        <section id="file-management-block" class="processing-block">
+            <h2>📁 Saved Files</h2>
+            <div class="block-content">
+                <div class="file-management-controls">
+                    <button id="refresh-files" class="secondary-btn">Refresh File List</button>
+                    <button id="clear-files" class="secondary-btn">Clear All Files</button>
+                </div>
+                
+                <!-- semantic_anchor: file_pairs_display -->
+                <div class="file-pairs-section" id="file-pairs-section">
+                    <h3>OCR-JSON File Pairs:</h3>
+                    <div class="file-pairs-container" id="file-pairs-container">
+                        <p class="no-files-message">No saved files found. Process some documents to see them here.</p>
+                    </div>
+                </div>
+                
+                <div class="file-stats" id="file-stats" style="display: none;">
+                    <p>Total pairs: <span id="total-pairs">0</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span id="status-text">Ready</span>
+            <div class="connection-status">
+                <span class="status-indicator" id="db-status"></span>
+                <span>Database</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

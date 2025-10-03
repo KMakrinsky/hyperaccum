@@ -1,0 +1,84 @@
+{
+  "article_metadata": {
+    "title": "Enhanced phytoextraction of cadmium and lead by Brassica juncea using EDTA chelation",
+    "authors": ["Smith, J.A.", "Johnson, M.B.", "Williams, C.D."],
+    "journal": "Environmental Science & Technology",
+    "year": 2023,
+    "doi": "10.1021/est.2023.12345"
+  },
+  "plant_species": {
+    "scientific_name": "Brassica juncea",
+    "common_name": "Indian mustard",
+    "family": "Brassicaceae",
+    "hyperaccumulator_status": true
+  },
+  "heavy_metals": ["Cd", "Pb"],
+  "experimental_conditions": {
+    "soil_type": "Sandy loam",
+    "pH": 6.5,
+    "temperature": "25±2°C",
+    "duration": "60 days",
+    "light_conditions": "16h photoperiod, 400 μmol m⁻² s⁻¹",
+    "additional_treatments": "EDTA (5 mmol/kg soil) applied 7 days before harvest"
+  },
+  "soil_concentrations": {
+    "Cd": "50 mg/kg",
+    "Pb": "500 mg/kg"
+  },
+  "plant_concentrations": {
+    "roots": {
+      "Cd": "125±15 mg/kg DW",
+      "Pb": "380±45 mg/kg DW"
+    },
+    "shoots": {
+      "Cd": "85±12 mg/kg DW", 
+      "Pb": "45±8 mg/kg DW"
+    },
+    "leaves": {
+      "Cd": "95±10 mg/kg DW",
+      "Pb": "52±6 mg/kg DW"
+    }
+  },
+  "bioaccumulation_factors": {
+    "Cd": 2.5,
+    "Pb": 0.76
+  },
+  "translocation_factors": {
+    "Cd": 0.68,
+    "Pb": 0.12
+  },
+  "growth_parameters": {
+    "biomass_data": {
+      "root_fresh_weight": "3.2±0.4 g/plant",
+      "root_dry_weight": "0.8±0.1 g/plant",
+      "shoot_fresh_weight": "12.5±1.8 g/plant",
+      "shoot_dry_weight": "2.3±0.3 g/plant"
+    },
+    "height": "35±5 cm",
+    "growth_inhibition": "15% reduction vs control",
+    "survival_rate": "95%",
+    "chlorophyll_content": "Reduced by 20% at highest Cd concentration"
+  },
+  "removal_efficiency": {
+    "total_uptake": {
+      "Cd": "0.17 mg/plant",
+      "Pb": "0.32 mg/plant"
+    },
+    "removal_percentage": {
+      "Cd": "12.3%",
+      "Pb": "3.1%"
+    },
+    "phytoextraction_potential": "High for Cd (TF > 1), moderate for Pb due to low translocation"
+  },
+  "statistical_analysis": {
+    "method": "One-way ANOVA with Tukey's HSD test",
+    "significance_level": "p < 0.05",
+    "replicates": 5
+  },
+  "extraction_metadata": {
+    "extraction_date": "2024-01-15",
+    "extraction_method": "LLM-assisted",
+    "confidence_score": 0.92,
+    "manual_validation": true
+  }
+}
