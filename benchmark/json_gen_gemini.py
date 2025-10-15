@@ -3,84 +3,84 @@ import google.generativeai as genai
 import json
 import time
 
-# --- НАСТРОЙКИ ---
+# --- SETTINGS ---
 OCR_DIR = 'ocr'
 JSON_OUTPUT_DIR = 'json'
 PROMPT_FILE = 'prompt.md'
 
-# Настройки для повторных попыток, как в вашем примере
+# Retry settings as in your example
 RETRY_COUNT = 3
-RETRY_DELAY = 5 # секунд
-# --- КОНЕЦ НАСТРОЕК ---
+RETRY_DELAY = 5  # seconds
+# --- END OF SETTINGS ---
 
 def configure_gemini():
-    """Настраивает и проверяет API-ключ для Gemini."""
+    """Configures and verifies the API key for Gemini."""
     try:
-        # Библиотека автоматически подхватит ключ из переменной окружения GOOGLE_API_KEY
-        api_key = "AIzaSyCs6uzqbha1z6kx7_urs-UBIjvAGNAk9Is"
+        # The library automatically picks up the key from the GOOGLE_API_KEY environment variable
+        api_key = "API here"
         if not api_key:
-            print("[ОШИБКА] Переменная окружения GOOGLE_API_KEY не найдена.")
-            print("Пожалуйста, установите её и перезапустите скрипт.")
+            print("[ERROR] Environment variable GOOGLE_API_KEY not found.")
+            print("Please set it and restart the script.")
             return None
         genai.configure(api_key=api_key)
-        print("API-ключ Google Gemini успешно сконфигурирован.")
+        print("Google Gemini API key configured successfully.")
         return True
     except Exception as e:
-        print(f"[ОШИБКА] Не удалось сконфигурировать Gemini: {e}")
+        print(f"[ERROR] Failed to configure Gemini: {e}")
         return None
 
 def load_prompt(file_path):
-    """Загружает системный промпт из файла."""
+    """Loads the system prompt from a file."""
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
-        print(f"Ошибка: Файл с системным промптом не найден по пути '{file_path}'")
+        print(f"Error: System prompt file not found at path '{file_path}'")
         return None
     except Exception as e:
-        print(f"Ошибка при чтении файла с промптом: {e}")
+        print(f"Error reading the prompt file: {e}")
         return None
 
 def get_gemini_response(system_prompt, user_content):
     """
-    Отправляет запрос к Gemini API, используя синтаксис, совместимый
-    с вашей версией библиотеки. Включает механизм повторных попыток.
+    Sends a request to the Gemini API using syntax compatible with your library version.
+    Includes a retry mechanism.
     """
-    # Инициализируем модель. Рекомендуется использовать 'gemini-1.5-pro-latest'
-    # для наилучшего соотношения производительности и доступности.
+    # Initialize the model. Recommended to use 'gemini-1.5-pro-latest'
+    # for the best balance of performance and availability.
     model = genai.GenerativeModel('gemini-2.5-flash')
 
-    # ВАЖНО: Убедитесь, что в вашем prompt.md есть четкое указание
-    # возвращать ТОЛЬКО JSON, так как мы не можем использовать response_mime_type.
-    # Пример: "Твой ответ должен быть только валидным JSON объектом без ```json ... ```"
+    # IMPORTANT: Ensure your prompt.md clearly specifies
+    # to return ONLY JSON, as we cannot use response_mime_type.
+    # Example: "Your answer must be a valid JSON object without ```json ... ```"
 
     for attempt in range(RETRY_COUNT):
         try:
-            print(f"  Отправка запроса в Google Gemini API (попытка {attempt + 1}/{RETRY_COUNT})...")
+            print(f"  Sending request to Google Gemini API (attempt {attempt + 1}/{RETRY_COUNT})...")
 
-            # Создаем список из промпта и текста статьи, как в вашем рабочем примере.
-            # Это синтаксис для более старых версий библиотеки.
+            # Create a list containing the system prompt and the article text, as in your working example.
+            # This syntax is for older versions of the library.
             response = model.generate_content([system_prompt, user_content])
             
-            # response.text - это самый простой способ получить результат
+            # response.text is the simplest way to get the result
             gemini_response_text = response.text.strip()
             
-            print("  Успешно получен ответ от Gemini.")
+            print("  Successfully received response from Gemini.")
             return gemini_response_text
 
         except Exception as e:
-            print(f"  [ОШИБКА] Произошла ошибка при запросе к Gemini API: {e}")
+            print(f"  [ERROR] An error occurred while requesting Gemini API: {e}")
             if attempt < RETRY_COUNT - 1:
-                print(f"  Повторная попытка через {RETRY_DELAY} секунд...")
+                print(f"  Retrying after {RETRY_DELAY} seconds...")
                 time.sleep(RETRY_DELAY)
             else:
-                print(f"  Не удалось получить ответ от Gemini после {RETRY_COUNT} попыток.")
+                print(f"  Failed to get a response from Gemini after {RETRY_COUNT} attempts.")
                 return None
     return None
 
 def main():
-    """Основная функция для запуска процесса генерации."""
-    print("--- Запуск скрипта генерации JSON с использованием Gemini ---")
+    """Main function to start the generation process."""
+    print("--- Starting JSON generation script using Gemini ---")
     
     if not configure_gemini():
         return
@@ -88,65 +88,65 @@ def main():
     system_prompt = load_prompt(PROMPT_FILE)
     if not system_prompt:
         return
-    print(f"Успешно загружен системный промпт из '{PROMPT_FILE}'.")
+    print(f"Successfully loaded system prompt from '{PROMPT_FILE}'.")
     
     if not os.path.isdir(OCR_DIR):
-        print(f"Ошибка: Папка с MD-файлами '{OCR_DIR}' не найдена.")
+        print(f"Error: Directory with MD files '{OCR_DIR}' not found.")
         return
     os.makedirs(JSON_OUTPUT_DIR, exist_ok=True)
     
     md_files = [f for f in os.listdir(OCR_DIR) if f.endswith('.md')]
     if not md_files:
-        print(f"В папке '{OCR_DIR}' не найдено .md файлов для обработки.")
+        print(f"No .md files found in '{OCR_DIR}' for processing.")
         return
     
     total_files = len(md_files)
-    print(f"Найдено {total_files} .md файлов для обработки.")
+    print(f"Found {total_files} .md files to process.")
 
     for i, md_filename in enumerate(md_files):
-        print(f"\n--- [ Файл {i + 1}/{total_files} ]: {md_filename} ---")
+        print(f"\n--- [ File {i + 1}/{total_files} ]: {md_filename} ---")
         
         base_name = os.path.splitext(md_filename)[0]
         input_path = os.path.join(OCR_DIR, md_filename)
         output_path = os.path.join(JSON_OUTPUT_DIR, f"{base_name}.json")
         
         if os.path.exists(output_path):
-            print("  JSON-файл уже существует. Пропускаем.")
+            print("  JSON file already exists. Skipping.")
             continue
             
         try:
             with open(input_path, 'r', encoding='utf-8') as f:
                 article_text = f.read()
         except Exception as e:
-            print(f"  [ОШИБКА] Не удалось прочитать файл: {e}")
+            print(f"  [ERROR] Failed to read file: {e}")
             continue
 
         gemini_result = get_gemini_response(system_prompt, article_text)
         
         if gemini_result is not None:
-            # Пытаемся очистить ответ от возможных артефактов, таких как ```json ... ```
+            # Try to clean the response from possible artifacts such as ```json ... ```
             if gemini_result.startswith("```json"):
                 gemini_result = gemini_result.strip("```json").strip()
 
             try:
-                # Проверяем, является ли ответ валидным JSON
+                # Verify that the response is valid JSON
                 json.loads(gemini_result)
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write(gemini_result)
-                print(f"  ✅ Валидный JSON от Gemini сохранен в '{output_path}'")
+                print(f"  ✅ Valid JSON from Gemini saved to '{output_path}'")
             except json.JSONDecodeError:
-                print(f"  [ПРЕДУПРЕЖДЕНИЕ] Ответ от Gemini не является валидным JSON. Ответ был:\n---\n{gemini_result}\n---")
-                # Сохраняем "сырой" ответ в текстовый файл для отладки
+                print(f"  [WARNING] Gemini response is not valid JSON. Response was:\n---\n{gemini_result}\n---")
+                # Save the raw response in a text file for debugging
                 error_path = os.path.join(JSON_OUTPUT_DIR, f"{base_name}_error.txt")
                 with open(error_path, 'w', encoding='utf-8') as f:
                     f.write(gemini_result)
-                print(f"  'Сырой' ответ сохранен для анализа в '{error_path}'")
+                print(f"  Raw response saved for analysis at '{error_path}'")
             except Exception as e:
-                print(f"  [ОШИБКА] Не удалось сохранить файл: {e}")
+                print(f"  [ERROR] Failed to save file: {e}")
         else:
-            print("  Не получен ответ от Gemini, файл не будет создан.")
+            print("  No response from Gemini; file will not be created.")
 
-    print("\n--- Процесс генерации завершен. ---")
+    print("\n--- Generation process completed. ---")
 
 if __name__ == "__main__":
     main()
