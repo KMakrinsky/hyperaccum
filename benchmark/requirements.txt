@@ -3,3 +3,4 @@ PyMuPDF
 Pillow
 pandas
 requests
+numpy
