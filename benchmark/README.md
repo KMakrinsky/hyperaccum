@@ -82,3 +82,24 @@ The pipeline consists of three main stages:
         python json_validator.py
         ```
 The validation scripts will output CSV files with detailed metrics.
+
+
+## Dataset Validation Notebook (`dataset_validation.ipynb`)
+
+The Jupyter notebook `dataset_validation.ipynb` provides a reproducible, interactive validation of the LLM‑extracted dataset against a reference dataset from a scientific article ([doi:10.1038/s41597-025-05239-7](https://doi.org/10.1038/s41597-025-05239-7)). It performs the following steps:
+
+1. **Load data** – Reads the ground‑truth CSV (`bcfdb.csv`) and the LLM‑generated CSV (`llm_dataset.csv`).
+2. **Clean & normalize** – Strips whitespace, converts BCF values to numeric, and drops rows with missing values.
+3. **Aggregate** – Groups by DOI, variety, and element, computing the mean BCF for each plant part.
+4. **Merge & compare** – Joins the two aggregated tables on the grouping columns, then calculates:
+  * `Abs_Difference` – absolute difference between original and LLM means.
+  * `Rel_Difference_%` – relative difference as a percentage of the original mean.
+5. **Style output** – Uses pandas styling to highlight rows with large relative differences (gradient from green = 0 % to red = ≥ 25 %). The final styled table is displayed directly in the notebook.
+
+This notebook makes it easy to see where the LLM extraction deviates from the reference data, quantify those deviations, and visually inspect problematic records. Run it locally with:
+
+```bash
+jupyter notebook dataset_validation.ipynb
+```
+
+after installing the required packages listed in `requirements.txt`.
